@@ -13,7 +13,7 @@ pub struct Collect<'info> {
     pub owner: Signer<'info>,
     /// CHECK: auth is used to sign the transfer of funds from the user to the owner.
     #[account(
-        seeds = [b"auth", subscription.product.key().as_ref(), subscription.tier.key().as_ref()],
+        seeds = [b"auth", subscription.user.key().as_ref(), mint.key().as_ref()],
         bump
     )]
     pub auth: UncheckedAccount<'info>,
@@ -30,6 +30,9 @@ pub struct Collect<'info> {
         associated_token::authority = subscription.user
     )]
     pub user_ata: InterfaceAccount<'info, TokenAccount>,
+    #[account(
+        has_one = mint
+    )]
     pub tier: Account<'info, Tier>,
     pub mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,

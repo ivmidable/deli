@@ -29,6 +29,10 @@ pub mod subscription {
         ctx.accounts.add_child_product(&ctx.bumps, name)
     }
 
+    pub fn delegate(ctx: Context<Delegate>) -> Result<()> {
+        ctx.accounts.delegate()
+    }
+
     pub fn subscribe(ctx: Context<Subscribe>) -> Result<()> {
         ctx.accounts.subscribe()
     }

@@ -10,6 +10,9 @@ pub use add_child_product::*;
 pub mod collect;
 pub use collect::*;
 
+pub mod delegate;
+pub use delegate::*;
+
 pub mod subscribe;
 pub use subscribe::*;
 

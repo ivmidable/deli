@@ -23,12 +23,6 @@ pub struct AddTier<'info> {
         space = Tier::LEN
     )]
     pub tier: Account<'info, Tier>,
-    #[account(
-        seeds = [b"auth", product.key().as_ref(), tier.key().as_ref()],
-        bump
-    )]
-    /// CHECK: This is used for collecting fees.
-    pub auth: UncheckedAccount<'info>,
     pub mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
@@ -49,7 +43,6 @@ impl<'info> AddTier<'info> {
         self.tier.amount = amount;
         self.tier.mint = self.mint.key();
         self.tier.bump = *bumps.get("tier").unwrap();
-        self.tier.auth_bump = *bumps.get("auth").unwrap();
         Ok(())
     }
 }
