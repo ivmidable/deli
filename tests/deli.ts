@@ -17,24 +17,30 @@ describe("deli", function() {
   );
   const provider = anchor.AnchorProvider.env();
 
-  before("setup", async function() {
-    // Configure the client to use the local cluster.
-    //const context = await startAnchor("./", [], []);
-    //const provider = new BankrunProvider(context);
+  //before("setup", async function() {
+  // Configure the client to use the local cluster.
+  //const context = await startAnchor("./", [], []);
+  //const provider = new BankrunProvider(context);
 
 
-    //anchor.setProvider(provider);
-    anchor.setProvider(provider);
+  //anchor.setProvider(provider);
+  anchor.setProvider(provider);
 
-    program = new anchor.Program<Deli>(
-      IDL,
-      programId,
-      anchor.getProvider()
-    );
-    //authority = context.payer;
-
-
+  program = new anchor.Program<Deli>(
+    IDL,
+    programId,
+    anchor.getProvider()
+  );
+  program.addEventListener("CreateIntervalEvent", (event, slot, signature) => {
+    console.log("CreateIntervalEvent", event, slot, signature);
   });
+  program.addEventListener("SubscribeEvent", (event, slot, signature) => {
+    console.log("SubscribeEvent", event, slot, signature);
+  });
+  //authority = context.payer;
+
+
+  // });
 
   it("Airdrop", async function() {
     await Promise.all(
@@ -184,7 +190,7 @@ describe("deli", function() {
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
         registry,
-      }).signers([user]).instruction();
+      }).instruction();
 
       let tx = await program.methods.subscribe().accounts({
         user: user.publicKey,
@@ -196,8 +202,10 @@ describe("deli", function() {
         associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
-      }).signers([user]).preInstructions([ix]).rpc();
-      console.log("Your transaction signature", tx);
+      }).preInstructions([ix]).transaction();
+
+      let sig = await provider.connection.sendTransaction(tx, [user]);
+      console.log("Your transaction signature", sig);
     } catch (e) {
       console.log(e);
       throw "BOOM";

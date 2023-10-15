@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeMap;
 
-use crate::state::{Registry, INTERVAL};
+use crate::state::{CreateIntervalEvent, Registry, INTERVAL};
 use anchor_spl::token_interface::{Mint, TokenInterface};
 
 #[derive(Accounts)]
@@ -38,6 +38,11 @@ impl<'info> CreateInterval<'info> {
         self.registry.nonce = nonce;
         self.registry.flags = 0 | INTERVAL;
         self.registry.bump = *bumps.get("registry").unwrap();
+        emit!(CreateIntervalEvent {
+            registry: self.registry.key(),
+            amount,
+            interval
+        });
         Ok(())
     }
 }

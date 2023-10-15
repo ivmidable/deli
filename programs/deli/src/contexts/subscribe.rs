@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 
 use crate::{
     errors::DeliError,
-    state::{Registry, Subscription},
+    state::{Registry, SubscribeEvent, Subscription},
 };
 
 #[derive(Accounts)]
@@ -57,6 +57,11 @@ impl<'info> Subscribe<'info> {
         self.subscription.bump = *bumps.get("subscription").unwrap();
         self.subscription.auth_bump = *bumps.get("auth").unwrap();
         self.subscription.next_payment = Clock::get()?.unix_timestamp + self.registry.interval;
+        emit!(SubscribeEvent {
+            registry: self.registry.key(),
+            user: self.user.key(),
+            next_payment: self.subscription.next_payment,
+        });
         Ok(())
     }
 }

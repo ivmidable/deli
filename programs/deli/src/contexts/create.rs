@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeMap;
 
-use crate::state::Registry;
+use crate::state::{CreateEvent, Registry};
 use anchor_spl::token_interface::{Mint, TokenInterface};
 
 #[derive(Accounts)]
@@ -36,6 +36,10 @@ impl<'info> CreateSingle<'info> {
         self.registry.nonce = nonce;
         self.registry.interval = 0;
         self.registry.bump = *bumps.get("regstry").unwrap();
+        emit!(CreateEvent {
+            registry: self.registry.key(),
+            amount: amount,
+        });
         Ok(())
     }
 }

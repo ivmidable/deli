@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Registry, Subscription};
+use crate::state::{Registry, Subscription, UnsubscribeEvent};
 
 #[derive(Accounts)]
 pub struct Unsubscribe<'info> {
@@ -18,6 +18,10 @@ pub struct Unsubscribe<'info> {
 
 impl<'info> Unsubscribe<'info> {
     pub fn unsubscribe(&self) -> Result<()> {
+        emit!(UnsubscribeEvent {
+            registry: self.registry.key(),
+            user: self.user.key()
+        });
         //we don't use this for anything at this point,
         //everything is done via anchor constraints.
         Ok(())

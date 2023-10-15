@@ -37,3 +37,29 @@ pub struct Subscription {
 impl Subscription {
     pub const LEN: usize = 8 + 32 + 32 + 8 + 8 + 8 + 1 + 1;
 }
+
+#[event]
+pub struct SubscribeEvent {
+    pub registry: Pubkey,
+    pub user: Pubkey,
+    pub next_payment: i64,
+}
+
+#[event]
+pub struct UnsubscribeEvent {
+    pub registry: Pubkey,
+    pub user: Pubkey,
+}
+
+#[event]
+pub struct CreateEvent {
+    pub registry: Pubkey,
+    pub amount: u64,
+}
+
+#[event]
+pub struct CreateIntervalEvent {
+    pub registry: Pubkey,
+    pub amount: u64,
+    pub interval: i64,
+}
