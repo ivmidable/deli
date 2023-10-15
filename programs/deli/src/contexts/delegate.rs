@@ -1,3 +1,4 @@
+use crate::state::Registry;
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -15,6 +16,11 @@ pub struct Delegate<'info> {
     /// CHECK: this is the auth that the user delegates to
     pub auth: UncheckedAccount<'info>,
     #[account(
+        has_one = mint,
+    )]
+    pub registry: Account<'info, Registry>,
+    #[account(
+        mut,
         associated_token::mint = mint,
         associated_token::authority = user
     )]
@@ -26,8 +32,8 @@ pub struct Delegate<'info> {
 }
 
 impl<'info> Delegate<'info> {
-    pub fn delegate(&mut self) -> Result<()> {
-        self.approve(u64::MAX)
+    pub fn delegate(&mut self, amount: u64) -> Result<()> {
+        self.approve(amount)
     }
 
     pub fn approve(&mut self, amount: u64) -> Result<()> {

@@ -4,8 +4,10 @@ use anchor_spl::{
     token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
-use crate::errors::SubscriptionError;
-use crate::state::{Subscription, Tier};
+use crate::{
+    errors::DeliError,
+    state::{Registry, Subscription},
+};
 
 #[derive(Accounts)]
 pub struct Collect<'info> {
@@ -14,9 +16,10 @@ pub struct Collect<'info> {
     /// CHECK: auth is used to sign the transfer of funds from the user to the owner.
     #[account(
         seeds = [b"auth", subscription.user.key().as_ref(), mint.key().as_ref()],
-        bump
+        bump = subscription.auth_bump
     )]
     pub auth: UncheckedAccount<'info>,
+    #[account(mut)]
     pub subscription: Account<'info, Subscription>,
     #[account(
         init_if_needed,
@@ -26,6 +29,7 @@ pub struct Collect<'info> {
     )]
     pub owner_ata: InterfaceAccount<'info, TokenAccount>,
     #[account(
+        mut,
         associated_token::mint = mint,
         associated_token::authority = subscription.user
     )]
@@ -33,7 +37,7 @@ pub struct Collect<'info> {
     #[account(
         has_one = mint
     )]
-    pub tier: Account<'info, Tier>,
+    pub registry: Account<'info, Registry>,
     pub mint: InterfaceAccount<'info, Mint>,
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -48,25 +52,26 @@ impl<'info> Collect<'info> {
     }
 
     pub fn check_if_subscription_is_due(&self) -> Result<()> {
-        if self.subscription.nextPayment > Clock::get()?.unix_timestamp {
-            return Err(SubscriptionError::SubscriptionNotDue.into());
+        if self.subscription.next_payment > Clock::get()?.unix_timestamp {
+            return Err(DeliError::SubscriptionNotDue.into());
         }
         Ok(())
     }
 
     pub fn update_subscription(&mut self) -> Result<()> {
-        self.subscription.nextPayment = self.subscription.nextPayment + self.tier.term;
+        self.subscription.next_payment = self.subscription.next_payment + self.registry.interval;
+        self.subscription.nonce = self.subscription.nonce + 1;
         Ok(())
     }
 
     pub fn transfer_to_owner(&self) -> Result<()> {
-        let product_key = self.subscription.product.key();
-        let tier_key = self.subscription.tier.key();
+        let user_key = self.subscription.user.key();
+        let mint_key = self.mint.key();
         let seeds = &[
             b"auth",
-            product_key.as_ref(),
-            tier_key.as_ref(),
-            &[self.tier.auth_bump],
+            user_key.as_ref(),
+            mint_key.as_ref(),
+            &[self.subscription.auth_bump],
         ];
         let signer_seeds = &[&seeds[..]];
 
@@ -82,6 +87,6 @@ impl<'info> Collect<'info> {
             accounts,
             signer_seeds,
         );
-        transfer_checked(cpi_ctx, self.tier.amount, self.mint.decimals)
+        transfer_checked(cpi_ctx, self.registry.amount, self.mint.decimals)
     }
 }

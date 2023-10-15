@@ -1,12 +1,12 @@
 [package]
-name = "subscription"
+name = "deli"
 version = "0.1.0"
-description = "Subscription and Affiliate program for Dittobot"
+description = "delegation subscription extension for token/token2022"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "subscription"
+name = "deli"
 
 [features]
 no-entrypoint = []

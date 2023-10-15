@@ -2,7 +2,7 @@
 seeds = false
 skip-lint = false
 [programs.localnet]
-subscription = "EgYj5qqk1Kbq3eSwbUYwyDWQ6j3tnXkTej4MJJWkzqSQ"
+deli = "7cr8PdkQzH1WoCk6gyrhHYJqXpGx3LZH7ttH1cxcD8MS"
 
 [registry]
 url = "https://api.apr.dev"
